@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My GeoCode App- Gilbert Nakiboli- captainteknics@gmail.com</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Axios - Promise Based Request Client -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+
+        <form id="locationForm" onsubmit="event.preventDefault(); geocode();">
+            <input type="text" name="location" id="location" required minlength="3" maxlength="50">
+            <button type="submit" class="btn btn-primary">Check Location</button>
+        </form>
+
+        <!-- Output Values from JSON -->
+        <p id="output"></p>
+
+        <!-- Address Components Output -->
+        <div id="addressComponentsOutput"></div>
+
+        <!-- Geometry Output -->
+        <div id="geometryOutput"></div>
+
+        <script>
+            function geocode() {
+                var location = document.getElementById("location").value;
+                axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+                    params: {
+                        address: location,
+                        key: 'ApiKeyFrom-GCP',
+                    }
+                })
+                .then(function(response) {
+                    if (response.data.status === 'OK') {
+                        // Full response
+                        console.log(response);
+        
+                        // Formatted Address
+                        var formattedAddress = response.data.results[0].formatted_address;
+                        document.getElementById('output').innerHTML = formattedAddress;
+        
+                        // Address Components
+                        var addressComponents = response.data.results[0].address_components;
+                        var addressComponentsOutput = '<ul class="list-group">';
+                        for (var i = 0; i < addressComponents.length; i++) {
+                            addressComponentsOutput += `<li class="list-group-item"><strong>${addressComponents[i].types[0]}</strong>: ${addressComponents[i].long_name}</li>`;
+                        }
+                        addressComponentsOutput += '</ul>';
+                        document.getElementById('addressComponentsOutput').innerHTML = addressComponentsOutput;
+        
+                        // Geometry: Location (latitude and longitude)
+                        var location = response.data.results[0].geometry.location;
+                        var geometryOutput = `Latitude: ${location.lat}<br>Longitude: ${location.lng}`;
+                        document.getElementById('geometryOutput').innerHTML = geometryOutput;
+        
+                        // Save variable values to file
+                        saveVariableValues();
+                    } else {
+                        console.error('Error: Response status is not OK');
+                    }
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });
+            }
+        
+            function saveVariableValues() {
+                var content = "";
+        
+                // Add variable names and values
+                content += "Location: " + document.getElementById("location").value + "\n";
+                content += "Formatted Address: " + document.getElementById("output").innerHTML + "\n";
+                content += "Address Components: " + document.getElementById("addressComponentsOutput").innerHTML + "\n";
+                content += "Geometry: " + document.getElementById("geometryOutput").innerHTML + "\n";
+        
+                // Create a blob with the content
+                var blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        
+                // Create a link element
+                var link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", "variableValues.txt");
+        
+                // Append the link to the body
+                document.body.appendChild(link);
+        
+                // Click the link to prompt download
+                link.click();
+        
+                // Remove the link from the body
+                document.body.removeChild(link);
+            }
+        </script>
+        
+
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+<!-- shereAPI Key -  -->
+
+<!-- Geocoding https://maps.googleapis.com/maps/api/geocode/json?address=Toledo&key=YOUR_API_KEY -->
+
+<!-- reversegeocoing - https://maps.googleapis.com/maps/api/geocode/json?latlng=40.714224,-73.961452&key=YOUR_API_KEY -->
+
+<!-- https://maps.googleapis.com/maps/api/geocode/json?latlng=40.714224,-73.961452
+&location_type=ROOFTOP&result_type=street_address&key=YOUR_API_KEY -->
+
